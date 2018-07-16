@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>myBlog</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment-with-locales.js"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="input_form">
+
+            <div class="input_title">
+                <span>Заголовок&nbsp;статьи:</span>
+                <input type="text" v-model="posts.title" placeholder="Заголовок статьи">
+            </div>
+
+            <div class="input_article">
+                <span>Статья:</span>
+                <textarea v-model="posts.article" placeholder="Введите статью"></textarea>
+            </div>
+
+            <button type="submit" v-on:click.prevent="addTable">Опубликовать</button>
+
+        </div>
+
+        <div class="output_articles">
+            <div class="table_head">
+                <div class="thead-t">Заголовок</div>
+                <div class="thead-a">Статья</div>
+                <div class="thead-d">Дата</div>
+            </div>
+            <blog-post v-for="post in posts" v-bind:key="post.id" v-bind:post="post"></blog-post>
+        </div>
+        
+    </div>
+        
+    <script>
+        Vue.filter('formatDate', function(value) {
+            moment.locale('ru'); 
+            if (value) {
+                return moment(String(value)).format('lll')
+            }
+        });
+        
+        Vue.component('blog-post', {
+            props: ['post'],
+            template: '<div class="blog-post"><div class="blog-body-t">{{ post.title }}</div><div class="blog-body-a">{{ post.article }}</div><div class="blog-body-d">{{ post.date | formatDate }}</div></div>'
+        });
+                
+        new Vue({
+            el: ".container",
+            data: {
+                posts: [{
+                    date: '',
+                    title: '',
+                    article: ''
+                }]
+            },
+
+            created: function() {
+                var vm = this
+                this.$http.post('/find')
+                    .then(response => {
+                        return response.json()
+                    })
+                    .then(data => {
+                        vm.posts = data
+                    })
+            },
+
+            methods: {
+                addTable: function() {
+                    var vm = this
+                    this.$http.post('/add', {
+                            title: this.posts.title,
+                            article: this.posts.article
+                        }
+                                   )
+                        .then(response => {
+                            return response.json()
+                        }
+                             )
+                        .then(data => {
+                            vm.posts = data
+                        }
+                             )
+                        .catch(Error => alert('Похоже слишком длинный заголовок, нужно меньше 255 символов'))
+                }
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

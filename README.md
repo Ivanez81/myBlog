@@ -1,3 +1,3 @@
 # myBlog
 
-Create SPA, used: Spring + h2 + React.
+Create SPA, used: SpringBoot + h2 + Vue.
