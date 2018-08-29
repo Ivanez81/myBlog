@@ -3,8 +3,8 @@ package ru.ntcvulkan.myblog.back.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.ntcvulkan.myblog.back.dao.ArticlesDAO;
-import ru.ntcvulkan.myblog.back.entity.Articles;
+import ru.ntcvulkan.myblog.back.repository.ArticlesRepository;
+import ru.ntcvulkan.myblog.back.entity.Article;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,24 +16,33 @@ import java.util.stream.Collectors;
 public class MainController {
 
     @Autowired
-    private ArticlesDAO articlesDAO;
+    ArticlesRepository articlesRepository;
+
+//    @RequestMapping(
+//            value = "/find",
+//            method = RequestMethod.POST,
+//            produces = "application/json"
+//    )
+//    public List<Article> findAllEntity() {
+//        return articlesRepository.findAllDescDate();
+//    }
 
     @RequestMapping(
             value = "/add",
             method = RequestMethod.POST,
             produces = "application/json"
     )
-    public ResponseEntity<List<Articles>> addEntity(@RequestBody Articles articlesHTTP) {
-        List<Articles> list = new ArrayList<>();
-        articlesHTTP.setDate(LocalDateTime.now());
-        articlesDAO.save(articlesHTTP);
-        articlesDAO.findAll().forEach(p -> list.add(p));
+    public ResponseEntity<List<Article>> addEntity(@RequestBody Article articleHTTP) {
+        List<Article> list = new ArrayList<>();
+        articleHTTP.setDate(LocalDateTime.now());
+        articlesRepository.save(articleHTTP);
+        articlesRepository.findAll().forEach(p -> list.add(p));
         return ResponseEntity
                 .ok()
                 .body(list
                         .stream()
                         .sorted(Comparator
-                                .comparing(Articles::getDate)
+                                .comparing(Article::getDate)
                                 .reversed())
                         .collect(Collectors.toList())
                 );
@@ -44,17 +53,18 @@ public class MainController {
             method = RequestMethod.POST,
             produces = "application/json"
     )
-    public ResponseEntity<List<Articles>> findAllEntity() {
-        List<Articles> list = new ArrayList<>();
-        articlesDAO.findAll().forEach(p -> list.add(p));
+    public ResponseEntity<List<Article>> findAllEntity() {
+        List<Article> list = new ArrayList<>();
+        articlesRepository.findAll().forEach(p -> list.add(p));
         return ResponseEntity
                 .ok()
                 .body(list
                         .stream()
                         .sorted(Comparator
-                                .comparing(Articles::getDate)
+                                .comparing(Article::getDate)
                                 .reversed())
                         .collect(Collectors.toList())
                 );
     }
+
 }
